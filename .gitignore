@@ -2,3 +2,4 @@ java-server.iml
 lib/
 out/
 .idea/
+.DS_Store

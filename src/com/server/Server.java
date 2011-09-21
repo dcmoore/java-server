@@ -2,7 +2,7 @@ package com.server;
 
 import java.net.ServerSocket;
 
-/**
+/*
  * This file runs the server
  */
 
@@ -12,21 +12,20 @@ public class Server {
     }
 
     public static boolean startServer(int port, RequestHandler requestListener) {
-        boolean success = true;
-        boolean failure = false;
+        boolean success;
 
         System.out.println("Starting the server on port: " + port);
 
         try {
             ServerSocket server = new ServerSocket(port);
-            requestListener.fulfillRequests(server);
+            success = requestListener.fulfillRequests(server);
             server.close();
+            System.out.println("Closed the server on port: " + server.getLocalPort());
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return failure;
+            success = false;
         }
 
-        System.out.println("Closed the server on port: " + port);
         return success;
     }
 }

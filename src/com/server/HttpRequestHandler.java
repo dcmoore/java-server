@@ -1,44 +1,40 @@
 package com.server;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HttpRequestHandler implements RequestHandler {
-    public boolean fulfillRequests(ServerSocket server) {
-        int count = 0;
+    private long numRequests = 10;
 
-        while(count == 0) {
+    public long getNumRequests() {
+        return numRequests;
+    }
+
+    public void setNumRequests(long n) {
+        numRequests = n;
+    }
+
+    public boolean fulfillRequests(ServerSocket server) {
+        boolean success = true;
+        boolean serveRequests = true;
+        long id = 0;
+
+        while(serveRequests) {
             try {
                 System.out.println("Waiting for a request...");
                 Socket connection = server.accept();
-                BufferedReader request = new BufferedReader
-                  (new InputStreamReader(connection.getInputStream()));
-                PrintWriter response = new PrintWriter
-                  (connection.getOutputStream(), true);
 
-                String temp = "<html><body>";
-                String line = request.readLine();
-                while(!(line.equals(""))) {
-                    System.out.println("Looping through request...");
-                    System.out.println(line.equals(""));
-                    temp += line + "<br />";
-                    line = request.readLine();
+                new Thread(new Task(connection, (id++ + ""))).start();
+
+                if(id == numRequests) {
+                    serveRequests = false;
                 }
-
-                System.out.println("Done looping through request");
-                response.println(temp + "</body></html>");
-
-                connection.close();
             } catch (Exception e) {
                 System.out.println(e.getMessage());
+                success = false;
             }
-
-            count++;
         }
 
-        return true;
+        return success;
     }
 }

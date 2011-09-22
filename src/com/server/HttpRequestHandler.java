@@ -18,13 +18,14 @@ public class HttpRequestHandler implements RequestHandler {
         boolean success = true;
         boolean serveRequests = true;
         long id = 0;
+        int numStartingThreads = Thread.activeCount();
 
         while(serveRequests) {
             try {
                 System.out.println("Waiting for a request...");
                 Socket connection = server.accept();
 
-                new Thread(new Task(connection, (id++ + ""))).start();
+                new Thread(this.createTask(connection, (id++ + ""))).start();
 
                 if(id == numRequests) {
                     serveRequests = false;
@@ -35,6 +36,13 @@ public class HttpRequestHandler implements RequestHandler {
             }
         }
 
-        return success;
+        while(true) {
+            if(Thread.activeCount() == numStartingThreads)
+                return success;
+        }
+    }
+
+    public Runnable createTask(Socket s, String name) {
+        return new Task(s, name);
     }
 }

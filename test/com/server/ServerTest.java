@@ -8,7 +8,7 @@ public class ServerTest {
 	@Test
 	public void opensASocket() {
         RequestHandler mockHandler = new MockHttpRequestHandler();
-        assertTrue(Server.startServer(8801, mockHandler));
+        assertTrue(Server.runServer(8801, mockHandler));
 	}
 
     private class MockHttpRequestHandler implements RequestHandler {

@@ -8,10 +8,10 @@ import java.net.ServerSocket;
 
 public class Server {
     public static void main (String[] args) {
-        startServer(8765, new HttpRequestHandler());
+        runServer(8765, new HttpRequestHandler());
     }
 
-    public static boolean startServer(int port, RequestHandler requestListener) {
+    public static boolean runServer(int port, RequestHandler requestListener) {
         boolean success;
 
         System.out.println("Starting the server on port: " + port);

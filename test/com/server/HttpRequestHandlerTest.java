@@ -5,18 +5,28 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HttpRequestHandlerTest {
     class TestServer implements Runnable {
         public void run() {
-            RequestHandler testHandler = new HttpRequestHandler();
+            RequestHandler testHandler = new TestHttpRequestHandler();
             testHandler.setNumRequests(1);
-            Server.startServer(8802, testHandler);
+            Server.runServer(8802, testHandler);
+        }
+    }
+
+    class TestHttpRequestHandler extends HttpRequestHandler {
+        public Runnable createTask(Socket s, String name) {
+            return new MockTask();
+        }
+    }
+
+    class MockTask implements Runnable {
+        public void run() {
+            System.out.println("Test Thread");
         }
     }
 
@@ -31,6 +41,7 @@ public class HttpRequestHandlerTest {
         System.setOut(new PrintStream(outContent));
 
         new Thread(new TestServer()).start();
+
         try {
             Socket s = new Socket("localhost", 8802);
             input = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -51,11 +62,38 @@ public class HttpRequestHandlerTest {
 
         //This is needed to make sure that the thread finishes before we reset System.out
         try {
-            Thread.sleep(5000);
-        } catch (Exception e) {
+            Thread.sleep(10);
+        }
+        catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        assertEquals(outContent.toString(), "Starting the server on port: 8802\nWaiting for a request...\nClosed the server on port: 8802\nThread 0 is starting...\nThread 0 is done.\n");
+        assertEquals(outContent.toString(),
+            "Starting the server on port: 8802\n" +
+            "Waiting for a request...\n" +
+            "Test Thread\n" +
+            "Closed the server on port: 8802\n");
     }
+
+    @Test
+    public void doesntCloseSocketUntilAllRequestsAreFinished() {
+        for(int i = 0; i < 60; i++) {
+            output.print("Test html request");
+
+            //This is needed to make sure that the thread finishes before we reset System.out
+            try {
+                Thread.sleep(10);
+            }
+            catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+
+            assertEquals(outContent.toString(),
+                "Starting the server on port: 8802\n" +
+                "Waiting for a request...\n" +
+                "Test Thread\n" +
+                "Closed the server on port: 8802\n");
+        }
+    }
+
 }

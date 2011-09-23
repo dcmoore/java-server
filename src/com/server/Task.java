@@ -138,7 +138,6 @@ public class Task implements Runnable {
 
     public void sendImageResponse(File file) {
         try {
-            System.out.println("Image path: " + file.getAbsolutePath());
             FileInputStream inputStream = new FileInputStream(file);
             byte[] bytes = new byte[(int) file.length()];
             OutputStream output = connection.getOutputStream();
@@ -180,13 +179,13 @@ public class Task implements Runnable {
     }
 
     public void timeStampResponse(Map<String, String> request) {
-//        try {
-//            Thread.sleep(5000);
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
-        for(long i = (7*Integer.MIN_VALUE); i < Integer.MAX_VALUE; i++) {}
+//        for(long i = (7*Integer.MIN_VALUE); i < Integer.MAX_VALUE; i++) {}
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();

@@ -11,10 +11,12 @@ import java.net.Socket;
 
 public class HttpRequestHandlerTest {
     class TestServer implements Runnable {
+        public boolean success;
+
         public void run() {
             RequestHandler testHandler = new TestHttpRequestHandler();
-            testHandler.setNumRequests(1);
-            Server.runServer(8802, testHandler);
+            testHandler.setNumRequests(3);
+            success = Server.runServer(8802, testHandler);
         }
     }
 
@@ -26,21 +28,24 @@ public class HttpRequestHandlerTest {
 
     class MockTask implements Runnable {
         public void run() {
-            System.out.println("Test Thread");
+            System.out.println("Test Thread Start");
+            try {
+                Thread.sleep(1000);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+            System.out.println("Test Thread Start");
         }
     }
 
     BufferedReader input;
     PrintWriter output;
-    PrintStream stndOut;
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+    TestServer serv;
 
     @Before
     public void initialize() {
-        stndOut = System.out;
-        System.setOut(new PrintStream(outContent));
-
-        new Thread(new TestServer()).start();
+        serv = new TestServer();
+        new Thread(serv).start();
 
         try {
             Socket s = new Socket("localhost", 8802);
@@ -51,49 +56,23 @@ public class HttpRequestHandlerTest {
         }
     }
 
-    @After
-    public void cleanUpStreams() {
-        System.setOut(stndOut);
-    }
-
     @Test
     public void acceptsRequests() {
-        output.print("Test html request");
+        output.println("Test html request1");
+        output.flush();
+        output.println("Test html request2");
+        output.flush();
+        output.println("Test html request3");
+        output.flush();
 
         //This is needed to make sure that the thread finishes before we reset System.out
         try {
-            Thread.sleep(10);
+            Thread.sleep(100);
         }
         catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        assertEquals(outContent.toString(),
-            "Starting the server on port: 8802\n" +
-            "Waiting for a request...\n" +
-            "Test Thread\n" +
-            "Closed the server on port: 8802\n");
+        assert(serv.success);
     }
-
-//    @Test
-//    public void doesntCloseSocketUntilAllRequestsAreFinished() {
-//        for(int i = 0; i < 60; i++) {
-//            output.print("Test html request");
-//
-//            //This is needed to make sure that the thread finishes before we reset System.out
-//            try {
-//                Thread.sleep(10);
-//            }
-//            catch (Exception e) {
-//                System.out.println(e.getMessage());
-//            }
-//
-//            assertEquals(outContent.toString(),
-//                "Starting the server on port: 8802\n" +
-//                "Waiting for a request...\n" +
-//                "Test Thread\n" +
-//                "Closed the server on port: 8802\n");
-//        }
-//    }
-
 }

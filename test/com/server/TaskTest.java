@@ -103,7 +103,7 @@ public class TaskTest {
 //    public void formDataRequestTest() {
 //        output.println("POST /formData HTTP/1.1");
 //        output.println("Host: localhost:8803\n\n");
-//        output.println("text1=asdf&text2=zxcv\n");
+//        output.println("text1=asdf&text2=zxcv");
 //
 //        try {
 //            Thread.sleep(500);
@@ -120,7 +120,7 @@ public class TaskTest {
         output.println("Host: localhost:8803\n");
 
         try {
-            Thread.sleep(3200);
+            Thread.sleep(2200);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

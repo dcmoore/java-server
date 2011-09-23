@@ -102,20 +102,20 @@ public class TaskTest {
         assertEquals("HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body><form name=\"input\" action=\"/formData\" method=\"post\"><input type=\"text\" name=\"text1\" /><input type=\"text\" name=\"text2\" /><input type=\"submit\" value=\"Submit\" /></form></body></html>", testServerResponse);
     }
 
-//    @Test
-//    public void formDataRequestTest() {
-//        output.println("POST /formData HTTP/1.1");
-//        output.println("Host: localhost:8803\n\n");
-//        output.println("text1=asdf&text2=zxcv\n");
-//
-//        try {
-//            Thread.sleep(500);
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
-//
-//        assertEquals("<html><body>text1=asdf&text2=zxcv</body></html>", testServerResponse);
-//    }
+    @Test
+    public void formDataRequestTest() {
+        output.println("POST /formData HTTP/1.1");
+        output.println("Host: localhost:8803\n\n");
+        output.println("text1=asdf&text2=zxcv\n");
+
+        try {
+            Thread.sleep(500);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        assertEquals("HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body><p>asdf</p><p>zxcv</p></body></html>", testServerResponse);
+    }
 
     @Test
     public void timeStampTest() {
@@ -175,7 +175,9 @@ public class TaskTest {
 
     @Test
     public void isImageTest() {
-        assert(new Task(new Socket(), "Test").isImage("jpg"));
-        assert(!(new Task(new Socket(), "Test").isImage("invalid")));
+        Task testTask = new Task(new Socket(), "Test");
+        assert(testTask.isImage("jpg"));
+        assert(!(testTask.isImage("invalid")));
+        testTask.closeConnection();
     }
 }

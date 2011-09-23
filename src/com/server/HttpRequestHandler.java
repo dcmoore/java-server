@@ -19,11 +19,13 @@ public class HttpRequestHandler implements RequestHandler {
         boolean serveRequests = true;
         long id = 0;
         int numStartingThreads = Thread.activeCount();
+        ThreadGroup tg = new ThreadGroup("Tasks");
 
         while(serveRequests) {
             try {
                 System.out.println("Waiting for a request...");
 
+                //new Thread(tg, this.createTask(server.accept(), (id++ + "")), (id + ""), 100).start();
                 new Thread(this.createTask(server.accept(), (id++ + ""))).start();
 
                 if(id == numRequests) {

@@ -1,14 +1,11 @@
 package com.server;
 
-import com.sun.tools.internal.ws.processor.model.Response;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,23 +40,28 @@ public class Task implements Runnable {
                   (new InputStreamReader(connection.getInputStream()));
 
             String line = request.readLine();
+
             formattedRequest.put("Method", line.split(" ")[0]);
             formattedRequest.put("Request-URI", line.split(" ")[1]);
             formattedRequest.put("HTTP-Version", line.split(" ")[2]);
 
             String body = "";
-            while(!(line.equals(""))) {  //while(request.ready()) {  //while(line != null) {
+            while(!(line.equals(""))) {
                 line = request.readLine();
                 body += line + "\n";
             }
-//            System.out.println("Can you see me?@@@@@@@@@@@@@@@@");
+
             if(formattedRequest.get("Method").equals("POST")) {
-                System.out.println("before");
-                    body += request.readLine(); //body += null;
-                System.out.println("after");
+                int c;
+                int contentLength = Integer.parseInt(body.split("Content-Length: ")[1].split("\n")[0]);
+
+                for(int n = 0; n < contentLength; n++) {
+                    c = request.read();
+                    body += (char)c;
+                }
             }
 
-//            System.out.println("Body = " + body);
+            System.out.println("Body = " + body);
 
             formattedRequest.put("Body", body);
         } catch (Exception e) {
@@ -138,10 +140,13 @@ public class Task implements Runnable {
 
     public void sendImageResponse() {
         try {
-            PrintWriter sender = new PrintWriter
-              (connection.getOutputStream(), true);
-
-            sender.println("Image here");
+            FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/dog.jpg");
+            DataInputStream in = new DataInputStream(fstream);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+            PrintStream writer = new PrintStream(connection.getOutputStream());
+            int x;
+            while ((x = reader.read()) != -1)
+                writer.write(x);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -165,10 +170,12 @@ public class Task implements Runnable {
     }
 
     public void formDataResponse(Map<String, String> request) {
-        response = request.get("Method") + " " +
-                request.get("Request-URI") + " " +
-                request.get("HTTP-Version") + "\n" +
-                request.get("Body") + "\n";
+        response = "HTTP/1.1 200 OK\n" +
+                "Content-Type: text/html; charset=UTF-8\n" +
+                "\n" +
+                "<html><body><p>" + request.get("Body").split("text1=")[1].split("&")[0] +
+                "</p><p>" + request.get("Body").split("text2=")[1] +
+                "</p></body></html>";
         sendStringResponse();
     }
 
@@ -230,7 +237,7 @@ public class Task implements Runnable {
     }
 
     public void imageResponse (Map<String, String> request) {
-        response = "put something here";
+//        response = "put something here";
         sendImageResponse();
     }
 }

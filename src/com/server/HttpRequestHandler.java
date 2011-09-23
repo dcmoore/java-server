@@ -23,9 +23,8 @@ public class HttpRequestHandler implements RequestHandler {
         while(serveRequests) {
             try {
                 System.out.println("Waiting for a request...");
-                Socket connection = server.accept();
 
-                new Thread(this.createTask(connection, (id++ + ""))).start();
+                new Thread(this.createTask(server.accept(), (id++ + ""))).start();
 
                 if(id == numRequests) {
                     serveRequests = false;

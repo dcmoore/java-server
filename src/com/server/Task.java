@@ -137,29 +137,19 @@ public class Task implements Runnable {
     }
 
     public void sendImageResponse(File file) {
-        FileInputStream inputStream = null;
-        OutputStream output = null;
         try {
-            inputStream = new FileInputStream(file);
+            System.out.println("Image path: " + file.getAbsolutePath());
+            FileInputStream inputStream = new FileInputStream(file);
             byte[] bytes = new byte[(int) file.length()];
-            output = connection.getOutputStream();
-            output.write(inputStream.read(bytes));
+            OutputStream output = connection.getOutputStream();
+            inputStream.read(bytes);
+            response = bytes;
+            output.write(bytes);
+            inputStream.close();
+            output.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-
-//        try {
-//            FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/dog.jpg");
-//            DataInputStream in = new DataInputStream(fstream);
-//            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-//            PrintStream writer = new PrintStream(connection.getOutputStream());
-//            int x;
-//            while ((x = reader.read()) != -1)
-//                writer.write(x);
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
     }
 
 

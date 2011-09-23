@@ -4,10 +4,7 @@ package com.server;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -159,19 +156,26 @@ public class TaskTest {
         assertEquals("200", testServerResponse.toString().split(" ")[1]);
     }
 
-//    @Test
-//    public void imageRenderTest() {
-//        output.println("GET /test/test_data/dog.jpg HTTP/1.1");
-//        output.println("Host: localhost:8803\n");
-//
-//        try {
-//            Thread.sleep(500);
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//        }
-//
-//        assertEquals("200", testServerResponse.toString().split(" ")[1]);
-//    }
+    @Test
+    public void imageRenderTest() {
+        output.println("GET /test/test_data/dog.jpg HTTP/1.1");
+        output.println("Host: localhost:8803\n");
+        Object img = null;
+
+        try {
+            File file = new File("/Users/dcmoore/Projects/java-server/test/test_data/dog.jpg");
+            FileInputStream inputStream = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
+            inputStream.read(bytes);
+            img = bytes;
+
+            Thread.sleep(500);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        assert(img.equals(testServerResponse));
+    }
 
     @Test
     public void isImageTest() {

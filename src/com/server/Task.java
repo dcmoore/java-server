@@ -61,8 +61,6 @@ public class Task implements Runnable {
                 }
             }
 
-            System.out.println("Body = " + body);
-
             formattedRequest.put("Body", body);
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -94,7 +92,7 @@ public class Task implements Runnable {
                         htmlResponse(request, file);
                     }
                     else if(isImage(file.getName().split("\\.")[1])) {
-                        imageResponse(request);
+                        sendImageResponse(file);
                     }
                 }
                 else {
@@ -138,18 +136,30 @@ public class Task implements Runnable {
         }
     }
 
-    public void sendImageResponse() {
+    public void sendImageResponse(File file) {
+        FileInputStream inputStream = null;
+        OutputStream output = null;
         try {
-            FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/dog.jpg");
-            DataInputStream in = new DataInputStream(fstream);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-            PrintStream writer = new PrintStream(connection.getOutputStream());
-            int x;
-            while ((x = reader.read()) != -1)
-                writer.write(x);
+            inputStream = new FileInputStream(file);
+            byte[] bytes = new byte[(int) file.length()];
+            output = connection.getOutputStream();
+            output.write(inputStream.read(bytes));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
+
+
+//        try {
+//            FileInputStream fstream = new FileInputStream(System.getProperty("user.dir") + "/dog.jpg");
+//            DataInputStream in = new DataInputStream(fstream);
+//            BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+//            PrintStream writer = new PrintStream(connection.getOutputStream());
+//            int x;
+//            while ((x = reader.read()) != -1)
+//                writer.write(x);
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        }
     }
 
 
@@ -224,7 +234,14 @@ public class Task implements Runnable {
         String output = "HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body>";
 
         for(String fileName : children) {
-            output += "<a href=\"" + request.get("Request-URI") + fileName + "\">" + fileName + "</a><br />\n";
+            File file = getFilePath(request.get("Request-URI") + fileName);
+            String[] nextChildren = file.list();
+            if(nextChildren == null) {
+                output += "<a href=\"http://localhost:8765" + request.get("Request-URI") + fileName + "\">" + fileName + "</a><br />\n";
+            }
+            else {
+                output += "<a href=\"http://localhost:8765" + request.get("Request-URI") + fileName + "/\">" + fileName + "</a><br />\n";
+            }
         }
 
         response = output + "</body></html>";
@@ -238,6 +255,6 @@ public class Task implements Runnable {
 
     public void imageResponse (Map<String, String> request) {
 //        response = "put something here";
-        sendImageResponse();
+//        sendImageResponse();
     }
 }

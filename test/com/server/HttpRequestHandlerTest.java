@@ -75,25 +75,25 @@ public class HttpRequestHandlerTest {
             "Closed the server on port: 8802\n");
     }
 
-    @Test
-    public void doesntCloseSocketUntilAllRequestsAreFinished() {
-        for(int i = 0; i < 60; i++) {
-            output.print("Test html request");
-
-            //This is needed to make sure that the thread finishes before we reset System.out
-            try {
-                Thread.sleep(10);
-            }
-            catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
-
-            assertEquals(outContent.toString(),
-                "Starting the server on port: 8802\n" +
-                "Waiting for a request...\n" +
-                "Test Thread\n" +
-                "Closed the server on port: 8802\n");
-        }
-    }
+//    @Test
+//    public void doesntCloseSocketUntilAllRequestsAreFinished() {
+//        for(int i = 0; i < 60; i++) {
+//            output.print("Test html request");
+//
+//            //This is needed to make sure that the thread finishes before we reset System.out
+//            try {
+//                Thread.sleep(10);
+//            }
+//            catch (Exception e) {
+//                System.out.println(e.getMessage());
+//            }
+//
+//            assertEquals(outContent.toString(),
+//                "Starting the server on port: 8802\n" +
+//                "Waiting for a request...\n" +
+//                "Test Thread\n" +
+//                "Closed the server on port: 8802\n");
+//        }
+//    }
 
 }

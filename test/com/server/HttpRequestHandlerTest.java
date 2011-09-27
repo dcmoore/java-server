@@ -1,78 +1,52 @@
 package com.server;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
-import java.io.*;
+import static org.junit.Assert.*;
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 public class HttpRequestHandlerTest {
-    class TestServer implements Runnable {
-        public boolean success;
-
-        public void run() {
-            RequestHandler testHandler = new TestHttpRequestHandler();
-            testHandler.setNumRequests(3);
-            success = Server.runServer(8802, testHandler);
-        }
-    }
-
-    class TestHttpRequestHandler extends HttpRequestHandler {
-        public Runnable createTask(Socket s, String name) {
-            return new MockTask();
-        }
-    }
-
     class MockTask implements Runnable {
+        private Socket socket;
+
+        public MockTask(Socket s) {
+            socket = s;
+        }
+
         public void run() {
-            System.out.println("Test Thread Start");
             try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
+                socket.close();
             }
-            System.out.println("Test Thread Start");
+            catch (Exception e) {}
         }
     }
 
-    BufferedReader input;
-    PrintWriter output;
-    TestServer serv;
+    class TestRequestHandler extends HttpRequestHandler {
+        public Runnable createTask(Socket s) throws IOException {
+            this.setNumRequests(1);
+            return new MockTask(s);
+        }
+    }
 
-    @Before
-    public void initialize() {
-        serv = new TestServer();
-        new Thread(serv).start();
-
-        try {
-            Socket s = new Socket("localhost", 8802);
-            input = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            output = new PrintWriter(s.getOutputStream(), true);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+    class ThreadedServer implements Runnable {
+        public void run() {
+            try {
+                ServerSocket server = new ServerSocket(8855);
+                new TestRequestHandler().fulfillRequests(server);
+                server.close();
+            } catch (Exception e) {}
         }
     }
 
     @Test
-    public void acceptsRequests() {
-        output.println("Test html request1");
-        output.flush();
-        output.println("Test html request2");
-        output.flush();
-        output.println("Test html request3");
-        output.flush();
+    public void handleRequestsWithoutGettingStuck() {
+        (new Thread(new ThreadedServer())).start();
 
-        //This is needed to make sure that the thread finishes before we reset System.out
         try {
-            Thread.sleep(100);
+            Socket test = new Socket("localhost", 8855);
+            test.getOutputStream().write("Test".getBytes());
         }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        assert(serv.success);
+        catch (Exception e) { assertTrue(false); }
     }
 }

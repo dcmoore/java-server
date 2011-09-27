@@ -3,3 +3,5 @@ lib/
 out/
 .idea/
 .DS_Store
+.clover/
+emma.jar

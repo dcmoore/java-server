@@ -21,9 +21,9 @@ public class HttpResponseGeneratorTest {
 
     @Test
     public void getStatusLine() {
-        assertEquals("HTTP/1.1 404 Not Found\n", generator1.getStatusLine(404));
-        assertEquals("HTTP/1.1 200 OK\n", generator1.getStatusLine(200));
-        assertEquals("HTTP/1.1 415 Unsupported Media Type\n", generator1.getStatusLine(415));
+        assertEquals("HTTP/1.1 404 Not Found\r\n", generator1.getStatusLine(404));
+        assertEquals("HTTP/1.1 200 OK\r\n", generator1.getStatusLine(200));
+        assertEquals("HTTP/1.1 415 Unsupported Media Type\r\n", generator1.getStatusLine(415));
     }
 
     @Test
@@ -32,11 +32,12 @@ public class HttpResponseGeneratorTest {
         request.put("Method", "GET");
         request.put("Request-URI", "/echo");
         request.put("HTTP-Version", "HTTP/1.1");
-        request.put("Body", "This: is_a_test");
+        request.put("This_is", "also_a_test");
+        request.put("This", "is_a_test");
 
         generator1 = new HttpResponseGenerator(request);
 
-        assertEquals("GET /echo HTTP/1.1\nThis: is_a_test\n", new String(generator1.generate()));
+        assertEquals("GET /echo HTTP/1.1\r\nThis: is_a_test\r\nThis_is: also_a_test\r\n\r\n", new String(generator1.generate()));
     }
 
     @Test
@@ -45,11 +46,11 @@ public class HttpResponseGeneratorTest {
         request.put("Method", "GET");
         request.put("Request-URI", "/form");
         request.put("HTTP-Version", "HTTP/1.1");
-        request.put("Body", "This: is_a_test");
+        request.put("This", "is_a_test");
 
         generator1 = new HttpResponseGenerator(request);
 
-        assertEquals("HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body><form name=\"input\" action=\"/formData\" method=\"post\"><input type=\"text\" name=\"text1\" /><input type=\"text\" name=\"text2\" /><input type=\"submit\" value=\"Submit\" /></form></body></html>",
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body><form name=\"input\" action=\"/formData\" method=\"post\"><input type=\"text\" name=\"text1\" /><input type=\"text\" name=\"text2\" /><input type=\"submit\" value=\"Submit\" /></form></body></html>",
                 new String(generator1.generate()));
     }
 
@@ -59,13 +60,13 @@ public class HttpResponseGeneratorTest {
         request.put("Method", "POST");
         request.put("Request-URI", "/formData");
         request.put("HTTP-Version", "HTTP/1.1");
-        request.put("Body", "This: is_a_test");
+        request.put("This", "is_a_test");
         request.put("Post-text1", "abc");
         request.put("Post-text2", "123");
 
         generator1 = new HttpResponseGenerator(request);
 
-        assertEquals("HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body><p>abc</p><p>123</p></body></html>",
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body><p>abc</p><p>123</p></body></html>",
                 new String(generator1.generate()));
     }
 
@@ -81,7 +82,7 @@ public class HttpResponseGeneratorTest {
         generator1 = new HttpResponseGenerator(request);
 
         assertEquals(true, (new String(generator1.generate())).contains(
-                "HTTP/1.1 200 OK\n"));
+                "HTTP/1.1 200 OK\r\n"));
     }
 
     class MockResponseGenerator extends HttpResponseGenerator {
@@ -127,7 +128,7 @@ public class HttpResponseGeneratorTest {
         generator1 = new HttpResponseGenerator(request);
 
         assertEquals(true, (new String(generator1.generate())).contains(
-                "HTTP/1.1 404 Not Found\n"));
+                "HTTP/1.1 404 Not Found\r\n"));
     }
 
     @Test
@@ -140,10 +141,10 @@ public class HttpResponseGeneratorTest {
 
         generator1 = new MockResponseGenerator(request);
 
-        assertEquals("HTTP/1.1 200 OK\nContent-Type: text/html; charset=UTF-8\n\n<html><body>" +
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "coverage/\">coverage</a><br />\n" +
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "dog.jpg\">dog.jpg</a><br />\n" +
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "test.html\">test.html</a><br />\n" +
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>" +
+                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "coverage/\">coverage</a><br />\r\n" +
+                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "dog.jpg\">dog.jpg</a><br />\r\n" +
+                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "test.html\">test.html</a><br />\r\n" +
                     "</body></html>",
                 new String(generator1.generate()));
     }

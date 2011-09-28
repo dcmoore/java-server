@@ -7,20 +7,20 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class HttpRequestParserTest {
-    String fakePostRequest = "POST /formData HTTP/1.1\n" +
-        "Host: localhost:8765\n" +
-        "Connection: keep-alive\n" +
-        "Content-Length: 19\n" +
-        "Cache-Control: max-age=0\n" +
-        "Origin: http://localhost:8765\n" +
-        "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.186 Safari/535.1\n" +
-        "Content-Type: application/x-www-form-urlencoded\n" +
-        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n" +
-        "Referer: http://localhost:8765/form\n" +
-        "Accept-Encoding: gzip,deflate,sdch\n" +
-        "Accept-Language: en-US,en;q=0.8\n" +
-        "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3\n" +
-        "\n" +
+    String fakePostRequest = "POST /formData HTTP/1.1\r\n" +
+        "Host: localhost:8765\r\n" +
+        "Connection: keep-alive\r\n" +
+        "Content-Length: 19\r\n" +
+        "Cache-Control: max-age=0\r\n" +
+        "Origin: http://localhost:8765\r\n" +
+        "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/14.0.835.186 Safari/535.1\r\n" +
+        "Content-Type: application/x-www-form-urlencoded\r\n" +
+        "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n" +
+        "Referer: http://localhost:8765/form\r\n" +
+        "Accept-Encoding: gzip,deflate,sdch\r\n" +
+        "Accept-Language: en-US,en;q=0.8\r\n" +
+        "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.3\r\n" +
+        "\r\n" +
         "text1=abc&text2=123&Referer: =hacker";
 
     @Test

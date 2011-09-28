@@ -43,8 +43,8 @@ public class HttpRequestParser implements RequestParser {
     public Map<String, String> parse() throws ArrayIndexOutOfBoundsException {
         Map<String, String> formattedRequest = new HashMap<String, String>();
 
-        String rawRequest = getRequest();
-        String requestLine = rawRequest.split("\n")[0];
+        String rawRequest = this.getRequest();
+        String requestLine = rawRequest.split("\r\n")[0];
         String[] requestLineElements = requestLine.split(" ");
 
         formattedRequest.put("Method", requestLineElements[0]);
@@ -53,12 +53,12 @@ public class HttpRequestParser implements RequestParser {
 
         for(String requestHeaderField : requestHeaderFields) {
             if(rawRequest.contains(requestHeaderField)) {
-                formattedRequest.put(requestHeaderField, rawRequest.split("\n" + requestHeaderField + ": ")[1].split("\n")[0]);
+                formattedRequest.put(requestHeaderField, rawRequest.split("\r\n" + requestHeaderField + ": ")[1].split("\r\n")[0]);
             }
         }
 
-        if(rawRequest.contains("\n\n")) {
-            String rawPostData = rawRequest.split("\n\n")[1];
+        if(formattedRequest.get("Method").equals("POST")) {
+            String rawPostData = rawRequest.split("\r\n\r\n")[1];
             String[] postDataArray = rawPostData.split("&");
 
             for(String post : postDataArray) {
@@ -76,14 +76,12 @@ public class HttpRequestParser implements RequestParser {
                   (new InputStreamReader(input));
 
         try {
-            while(request.ready()) {
+            while(request.ready()) {            //TODO - request variable is never ready in Chrome on the first request after a navigate backwards
                 int nextChar = request.read();
-
-
                 requestStringVersion += (char)nextChar;
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Failed to read request: " + e.getMessage());
         }
 
         return requestStringVersion;

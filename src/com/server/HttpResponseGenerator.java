@@ -1,17 +1,14 @@
 package com.server;
 
 
+import com.server.responses.*;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class HttpResponseGenerator implements ResponseGenerator {
-    Map<String, String> request;
+    protected Map<String, String> request;
 
     public HttpResponseGenerator(Map<String, String> r) {
         request = r;
@@ -66,16 +63,16 @@ public class HttpResponseGenerator implements ResponseGenerator {
 
     public byte[] generate() {
         if(request.get("Request-URI").equals("/echo")) {
-              return echoResponse();
+            return new EchoResponse(request).get();
         }
         else if(request.get("Method").equals("GET") && request.get("Request-URI").equals("/form")) {
-            return formResponse();
+            return new FormResponse(request).get();
         }
         else if(request.get("Method").equals("POST") && request.get("Request-URI").equals("/formData")) {
-            return formDataResponse();
+            return new FormDataResponse(request).post();
         }
         else if(request.get("Method").equals("GET") && request.get("Request-URI").equals("/time")) {
-            return timeStampResponse();
+            return new TimeStampResponse(request).get();
         }
         else {
             File file = getFile(request.get("Request-URI"));
@@ -83,106 +80,19 @@ public class HttpResponseGenerator implements ResponseGenerator {
 
             if (children == null) {
                 if(file.exists()) {
-                    return fileResponse(file);
+                    return new FileResponse(request).get(file);
                 }
                 else {
-                    return fileNotFoundResponse();
+                    return new FileNotFoundResponse(request).get();
                 }
             }
             else {
-                return directoryResponse(children);
+                return new DirectoryResponse(request).get(children);
             }
         }
-    }
-
-    public byte[] echoResponse() {
-        String response = request.get("Method") + " " +
-                request.get("Request-URI") + " " +
-                request.get("HTTP-Version") + "\r\n";
-
-        Iterator iterator = request.keySet().iterator();
-        while(iterator. hasNext()){
-            Object currentKey = iterator.next();
-            if(notHeader(currentKey)) {
-                response += currentKey + ": " + request.get(currentKey) + "\r\n";
-            }
-        }
-
-        return (response + "\r\n").getBytes();
-    }
-
-    public boolean notHeader(Object key) {
-        if(key.equals("Method") || key.equals("Request-URI") || key.equals("HTTP-Version")) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public byte[] formResponse() {
-        return (getStatusLine(200) + "Content-Type: text/html; charset=UTF-8\r\n\r\n<html><body><form name=\"input\" action=\"/formData\" method=\"post\"><input type=\"text\" name=\"text1\" /><input type=\"text\" name=\"text2\" /><input type=\"submit\" value=\"Submit\" /></form></body></html>").getBytes();
-    }
-
-    public byte[] formDataResponse() {
-        return (getStatusLine(200) +
-                "Content-Type: text/html; charset=UTF-8\r\n" +
-                "\r\n" +
-                "<html><body><p>" + request.get("Post-text1") +
-                "</p><p>" + request.get("Post-text2") +
-                "</p></body></html>").getBytes();
-    }
-
-    public byte[] timeStampResponse() {
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-//        for(long i = (7*Integer.MIN_VALUE); i < Integer.MAX_VALUE; i++) {}
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        return (getStatusLine(200) + "Content-Type: text/html; charset=UTF-8\r\n\r\n" + dateFormat.format(date)).getBytes();
     }
 
     public File getFile(String relativePath) {
         return new File(System.getProperty("user.dir") + relativePath);
-    }
-
-    public byte[] fileResponse(File file) {
-        byte[] bytes = new byte[]{};
-
-        try {
-            FileInputStream inputStream = new FileInputStream(file);
-            bytes = new byte[(int) file.length()];
-            inputStream.read(bytes);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-        return bytes;
-    }
-
-    public byte[] fileNotFoundResponse() {
-        return (getStatusLine(404) + "Content-Type: text/html; charset=UTF-8\r\n\r\n" +
-                "<html><body><h1>404 File Not Found</h1><p>Please try another file</p><body></html>").getBytes();
-    }
-
-    public byte[] directoryResponse(String[] children) {
-        String output = getStatusLine(200) + "Content-Type: text/html; charset=UTF-8\r\n\r\n<html><body>";
-
-        for(String fileName : children) {
-            File file = getFile(request.get("Request-URI") + fileName);
-            if(file.list() == null) {
-                output += "<a href=\"http://localhost:8765" + request.get("Request-URI") + fileName + "\">" + fileName + "</a><br />\r\n";
-            }
-            else {
-                output += "<a href=\"http://localhost:8765" + request.get("Request-URI") + fileName + "/\">" + fileName + "</a><br />\r\n";
-            }
-        }
-
-        output += "</body></html>";
-        return output.getBytes();
     }
 }

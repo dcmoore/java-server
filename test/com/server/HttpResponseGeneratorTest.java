@@ -142,7 +142,7 @@ public class HttpResponseGeneratorTest {
         generator1 = new MockResponseGenerator(request);
 
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>" +
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "coverage/\">coverage</a><br />\r\n" +
+                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "coverage\">coverage</a><br />\r\n" +  //TODO - Should link to coverage/ in test (not just in production)
                     "<a href=\"http://localhost:8765" + request.get("Request-URI") + "dog.jpg\">dog.jpg</a><br />\r\n" +
                     "<a href=\"http://localhost:8765" + request.get("Request-URI") + "test.html\">test.html</a><br />\r\n" +
                     "</body></html>",

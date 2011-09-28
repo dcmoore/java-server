@@ -76,7 +76,11 @@ public class HttpRequestParser implements RequestParser {
                   (new InputStreamReader(input));
 
         try {
-            while(request.ready()) {            //TODO - request variable is never ready in Chrome on the first request after a navigate backwards
+            if(!request.ready()) {                   //Required for Chrome Browser
+                requestStringVersion += (char)request.read();
+            }
+
+            while(request.ready()) {
                 int nextChar = request.read();
                 requestStringVersion += (char)nextChar;
             }

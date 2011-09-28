@@ -76,7 +76,7 @@ public class HttpRequestParser implements RequestParser {
                   (new InputStreamReader(input));
 
         try {
-            if(!request.ready()) {                   //Required for Chrome Browser
+            if(!request.ready()) { //Required for Chrome Browser
                 requestStringVersion += (char)request.read();
             }
 

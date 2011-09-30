@@ -12,11 +12,21 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class HttpResponseGeneratorTest {
+    class MockResponseGenerator extends HttpResponseGenerator {
+        public MockResponseGenerator(Map<String, String> r) {
+            super(r);
+        }
+
+        public File getFile(String relativePath) {
+            return new File("/Users/dcmoore/Projects/java-server/test/test_data/" + "public" + relativePath);
+        }
+    }
+
     ResponseGenerator generator1;
 
     @Before
     public void initializer() {
-        generator1 = new HttpResponseGenerator(new HashMap<String, String>());
+        generator1 = new MockResponseGenerator(new HashMap<String, String>());
     }
 
     @Test
@@ -35,7 +45,7 @@ public class HttpResponseGeneratorTest {
         request.put("This_is", "also_a_test");
         request.put("This", "is_a_test");
 
-        generator1 = new HttpResponseGenerator(request);
+        generator1 = new MockResponseGenerator(request);
 
         assertEquals("GET /echo HTTP/1.1\r\nThis: is_a_test\r\nThis_is: also_a_test\r\n\r\n", new String(generator1.generate()));
     }
@@ -48,7 +58,7 @@ public class HttpResponseGeneratorTest {
         request.put("HTTP-Version", "HTTP/1.1");
         request.put("This", "is_a_test");
 
-        generator1 = new HttpResponseGenerator(request);
+        generator1 = new MockResponseGenerator(request);
 
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body><form name=\"input\" action=\"/formData\" method=\"post\"><input type=\"text\" name=\"text1\" /><input type=\"text\" name=\"text2\" /><input type=\"submit\" value=\"Submit\" /></form></body></html>",
                 new String(generator1.generate()));
@@ -64,7 +74,7 @@ public class HttpResponseGeneratorTest {
         request.put("Post-text1", "abc");
         request.put("Post-text2", "123");
 
-        generator1 = new HttpResponseGenerator(request);
+        generator1 = new MockResponseGenerator(request);
 
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body><p>abc</p><p>123</p></body></html>",
                 new String(generator1.generate()));
@@ -79,25 +89,15 @@ public class HttpResponseGeneratorTest {
         request.put("Body", "This: is_a_test");
 
 
-        generator1 = new HttpResponseGenerator(request);
+        generator1 = new MockResponseGenerator(request);
 
         assertEquals(true, (new String(generator1.generate())).contains(
                 "HTTP/1.1 200 OK\r\n"));
     }
 
-    class MockResponseGenerator extends HttpResponseGenerator {
-        public MockResponseGenerator(Map<String, String> r) {
-            super(r);
-        }
-
-        public File getFile(String relativePath) {
-            return new File("/Users/dcmoore/Projects/java-server/test/test_data/" + relativePath);
-        }
-    }
-
     @Test
     public void fileServeRequest() {
-        File file = new File("/Users/dcmoore/Projects/java-server/test/test_data/test.html");
+        File file = new File("/Users/dcmoore/Projects/java-server/test/test_data/public/test.html");
         byte[] bytes = new byte[]{};
 
         try {
@@ -125,7 +125,7 @@ public class HttpResponseGeneratorTest {
         request.put("HTTP-Version", "HTTP/1.1");
         request.put("Body", "This: is_a_test");
 
-        generator1 = new HttpResponseGenerator(request);
+        generator1 = new MockResponseGenerator(request);
 
         assertEquals(true, (new String(generator1.generate())).contains(
                 "HTTP/1.1 404 Not Found\r\n"));
@@ -142,9 +142,29 @@ public class HttpResponseGeneratorTest {
         generator1 = new MockResponseGenerator(request);
 
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>" +
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "coverage\">coverage</a><br />\r\n" +  //TODO - Should link to coverage/ in test (not just in production)
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "dog.jpg\">dog.jpg</a><br />\r\n" +
-                    "<a href=\"http://localhost:8765" + request.get("Request-URI") + "test.html\">test.html</a><br />\r\n" +
+                    "<a href=\"/coverage\">coverage</a><br />\r\n" + //TODO - should be 'coverage/' instead of 'coverage'
+                    "<a href=\"/dog.jpg\">dog.jpg</a><br />\r\n" +
+                    "<a href=\"/test.html\">test.html</a><br />\r\n" +
+                    "</body></html>",
+                new String(generator1.generate()));
+    }
+
+    @Test
+    public void embeddedDirectoryRequestTest() {
+        Map<String, String> request = new HashMap<String, String>();
+        request.put("Method", "GET");
+        request.put("Request-URI", "/coverage/_files/");
+        request.put("HTTP-Version", "HTTP/1.1");
+        request.put("Body", "This: is_a_test");
+
+        generator1 = new MockResponseGenerator(request);
+
+        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n<html><body>" +
+                    "<a href=\"/coverage/_files/0.html\">0.html</a><br />\r\n" +
+                    "<a href=\"/coverage/_files/1.html\">1.html</a><br />\r\n" +
+                    "<a href=\"/coverage/_files/2.html\">2.html</a><br />\r\n" +
+                    "<a href=\"/coverage/_files/3.html\">3.html</a><br />\r\n" +
+                    "<a href=\"/coverage/_files/4.html\">4.html</a><br />\r\n" +
                     "</body></html>",
                 new String(generator1.generate()));
     }

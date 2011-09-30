@@ -62,7 +62,10 @@ public class HttpResponseGenerator implements ResponseGenerator {
     }
 
     public byte[] generate() {
-        if(request.get("Request-URI").equals("/echo")) {
+        if(isCustomRoute()) {
+            return new CustomResponse(request).get();
+        }
+        else if(request.get("Request-URI").equals("/echo")) {
             return new EchoResponse(request).get();
         }
         else if(request.get("Method").equals("GET") && request.get("Request-URI").equals("/form")) {
@@ -76,23 +79,30 @@ public class HttpResponseGenerator implements ResponseGenerator {
         }
         else {
             File file = getFile(request.get("Request-URI"));
-            String[] children = file.list();
 
-            if (children == null) {
-                if(file.exists()) {
-                    return new FileResponse(request).get(file);
-                }
-                else {
-                    return new FileNotFoundResponse(request).get();
-                }
+            if (file.isDirectory()) {
+                String[] children = file.list();
+                return new DirectoryResponse(request).get(children);
+            }
+            else if (file.isFile()) {
+                return new FileResponse(request).get(file);
             }
             else {
-                return new DirectoryResponse(request).get(children);
+                return new FileNotFoundResponse(request).get();
             }
         }
     }
 
+    public boolean isCustomRoute() {
+        File routes = getFile("/config/routes.txt");
+        if(!routes.exists()) {
+            return false;
+        }
+
+        return false;
+    }
+
     public File getFile(String relativePath) {
-        return new File(System.getProperty("user.dir") + relativePath);
+        return new File(System.getProperty("user.dir") + "/public" + relativePath);
     }
 }

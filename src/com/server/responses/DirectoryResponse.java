@@ -17,11 +17,16 @@ public class DirectoryResponse extends HttpResponseGenerator {
 
         for(String fileName : children) {
             File file = getThisFile(request.get("Request-URI") + fileName);
+
+            if(fileName.contains("index.")) {
+                return new FileResponse(request).get(file);
+            }
+
             if(file.list() == null) {
-                output += "<a href=\"http://localhost:8765" + request.get("Request-URI") + fileName + "\">" + fileName + "</a><br />\r\n";
+                output += "<a href=\"" + request.get("Request-URI") + fileName + "\">" + fileName + "</a><br />\r\n";
             }
             else {
-                output += "<a href=\"http://localhost:8765" + request.get("Request-URI") + fileName + "/\">" + fileName + "</a><br />\r\n";
+                output += "<a href=\"" + request.get("Request-URI") + fileName + "/\">" + fileName + "</a><br />\r\n";
             }
         }
 
@@ -30,6 +35,6 @@ public class DirectoryResponse extends HttpResponseGenerator {
     }
 
     public File getThisFile(String relativePath) {
-        return new File(System.getProperty("user.dir") + relativePath);
+        return new File(System.getProperty("user.dir") + "/public" + relativePath);
     }
 }

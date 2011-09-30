@@ -8,7 +8,11 @@ import java.net.ServerSocket;
 
 public class Server {
     public static void main (String[] args) {
-        runServer(8765, new HttpRequestHandler());
+        startHttpServer(8765);
+    }
+
+    public static boolean startHttpServer(int port) {
+        return runServer(port, new HttpRequestHandler());
     }
 
     public static boolean runServer(int port, RequestHandler requestListener) {

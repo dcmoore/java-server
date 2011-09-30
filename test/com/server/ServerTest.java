@@ -8,7 +8,6 @@ public class ServerTest {
 	private class MockHttpRequestHandler implements RequestHandler {
         private long numReqs;
         public void setNumRequests(long x){ numReqs = x; }
-        public long getNumRequests() {return numReqs;}
 
         public boolean fulfillRequests(ServerSocket server) {
             return true;
@@ -24,7 +23,7 @@ public class ServerTest {
     private class MockHttpRequestHandler2 implements RequestHandler {
         private long numReqs;
         public void setNumRequests(long x){ numReqs = x; }
-        public long getNumRequests() {return numReqs;}
+
 
         public boolean fulfillRequests(ServerSocket server) {
             double x = 1/0;

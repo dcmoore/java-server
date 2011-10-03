@@ -2,6 +2,9 @@ package com.server;
 
 import org.junit.*;
 import static org.junit.Assert.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 
 public class ServerTest {
@@ -12,6 +15,20 @@ public class ServerTest {
         public boolean fulfillRequests(ServerSocket server) {
             return true;
         }
+    }
+
+    PrintStream stndOut;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    @Before
+    public void initializer() {
+        stndOut = System.out;
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @After
+    public void cleanUpStreams() {
+        System.setOut(stndOut);
     }
 
     @Test

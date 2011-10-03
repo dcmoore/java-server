@@ -1,11 +1,14 @@
 package com.server;
 
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,15 +21,24 @@ public class HttpResponseGeneratorTest {
         }
 
         public File getFile(String relativePath) {
-            return new File("/Users/dcmoore/Projects/java-server/test/test_data/" + "public" + relativePath);
+            return new File("/Users/dcmoore/Projects/java-server/test/test_data" + "/public" + relativePath);
         }
     }
 
     ResponseGenerator generator1;
+    PrintStream stndOut;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
     @Before
     public void initializer() {
         generator1 = new MockResponseGenerator(new HashMap<String, String>());
+    }
+
+    @After
+    public void cleanUpStreams() {
+        System.setOut(stndOut);
+        stndOut = System.out;
+        System.setOut(new PrintStream(outContent));
     }
 
     @Test
@@ -167,5 +179,10 @@ public class HttpResponseGeneratorTest {
                     "<a href=\"/coverage/_files/4.html\">4.html</a><br />\r\n" +
                     "</body></html>",
                 new String(generator1.generate()));
+    }
+
+    @Test
+    public void parseRoutes() {
+        assertEquals("", "");
     }
 }

@@ -1,9 +1,13 @@
 package com.server;
 
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -18,6 +22,20 @@ public class IntegrationTest {
                 server.close();
             } catch (Exception e) {}
         }
+    }
+
+    PrintStream stndOut;
+    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+
+    @Before
+    public void initializer() {
+        stndOut = System.out;
+        System.setOut(new PrintStream(outContent));
+    }
+
+    @After
+    public void cleanUpStreams() {
+        System.setOut(stndOut);
     }
 
     @Test

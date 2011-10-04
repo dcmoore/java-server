@@ -5,10 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,6 +50,7 @@ public class HttpResponseGeneratorTest {
 
     @Test
     public void parseExternalRoutes() {
+        populateRoutesFile();
         Map<String, String> parsedRoute = new HashMap<String, String>();
         parsedRoute.put("/custom", "src/customResponse.java");
         parsedRoute.put("/custom2", "src/customResponse2.java");
@@ -61,8 +59,22 @@ public class HttpResponseGeneratorTest {
         assertEquals(parsedRoute, generator1.getRoutes());
     }
 
+    public void populateRoutesFile() {
+        String text = "/custom   |   src/customResponse.java\n" +
+                      "/custom2  |   src/customResponse2.java";
+        File file = generator1.getFile("/../config/routes.txt");
+        Writer output;
+
+        try {
+            output = new BufferedWriter(new FileWriter(file));
+            output.write(text);
+            output.close();
+        } catch (Exception e) {}
+    }
+
     @Test
     public void readInRoutesFile() {
+        populateRoutesFile();
         assertEquals("/custom   |   src/customResponse.java\n" +
                         "/custom2  |   src/customResponse2.java",
                     generator1.readInRoutes());
@@ -70,10 +82,7 @@ public class HttpResponseGeneratorTest {
 
     @Test
     public void isCustomRouteTest() {
-        Map<String, String> parsedRoute = new HashMap<String, String>();
-        parsedRoute.put("/custom", "src/customResponse.java");
-        parsedRoute.put("/custom2", "src/customResponse2.java");
-
+        populateRoutesFile();
         Map<String, String> request = new HashMap<String, String>();
         request.put("Method", "GET");
         request.put("Request-URI", "/custom");
@@ -83,6 +92,20 @@ public class HttpResponseGeneratorTest {
         generator1.parseRoutes();
 
         assertEquals(true, generator1.isCustomRoute());
+    }
+
+    @Test
+    public void getCustomRouteResponseTest() {
+        populateRoutesFile();
+        Map<String, String> request = new HashMap<String, String>();
+        request.put("Method", "GET");
+        request.put("Request-URI", "/custom");
+        request.put("HTTP-Version", "HTTP/1.1");
+
+        generator1 = new MockResponseGenerator(request);
+        generator1.parseRoutes();
+
+        assertEquals("", new String(generator1.generate()));
     }
 
     @Test

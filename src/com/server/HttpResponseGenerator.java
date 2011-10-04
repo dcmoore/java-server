@@ -73,7 +73,7 @@ public class HttpResponseGenerator implements ResponseGenerator {
         parseRoutes();
 
         if(isCustomRoute()) {
-            return new CustomResponse(request).get();
+            return new CustomResponse(request).get(routes.get(request.get("Request-URI")));
         }
         else if(request.get("Request-URI").equals("/echo")) {
             return new EchoResponse(request).get();
@@ -106,16 +106,21 @@ public class HttpResponseGenerator implements ResponseGenerator {
     public void parseRoutes() {
         String routesString = readInRoutes();
         routes = new HashMap<String, String>();
-        String[] allRoutes = routesString.split("\n");
 
-        for(String route : allRoutes) {
-            routes.put(route.split("\\|")[0].trim(), route.split("\\|")[1].trim());
+        if(!routesString.equals("")) {
+            String[] allRoutes = routesString.split("\n");
+            for(String route : allRoutes) {
+                routes.put(route.split("\\|")[0].trim(), route.split("\\|")[1].trim());
+            }
         }
     }
 
     public String readInRoutes() {
-        File routesFile = getFile("/../config/routes.txt");
         String routesString = "";
+        File routesFile = getFile("/../config/routes.txt");
+        if(!routesFile.exists()) {
+            return "";
+        }
 
         try {
             BufferedReader routeReader = new BufferedReader(new FileReader(routesFile));

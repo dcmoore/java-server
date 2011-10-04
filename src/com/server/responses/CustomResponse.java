@@ -8,7 +8,8 @@ public class CustomResponse extends HttpResponseGenerator {
         super(r);
     }
 
-    public byte[] get() {
+    public byte[] get(String relativeFilePath) {
+        System.out.println(relativeFilePath);
         return new byte[0];
     }
 }

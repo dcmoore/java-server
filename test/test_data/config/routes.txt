@@ -1,1 +1,2 @@
-/art src/art.jpg
+/custom   |   src/customResponse.java
+/custom2  |   src/customResponse2.java

@@ -3,15 +3,23 @@ package com.server;
 
 import com.server.responses.*;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
 public class HttpResponseGenerator implements ResponseGenerator {
     protected Map<String, String> request;
+    protected Map<String, String> routes;
 
     public HttpResponseGenerator(Map<String, String> r) {
         request = r;
+    }
+
+    public Map<String, String> getRoutes() {
+        return routes;
     }
 
     public String getStatusLine(int statusCode) {
@@ -62,6 +70,8 @@ public class HttpResponseGenerator implements ResponseGenerator {
     }
 
     public byte[] generate() {
+        parseRoutes();
+
         if(isCustomRoute()) {
             return new CustomResponse(request).get();
         }
@@ -93,10 +103,40 @@ public class HttpResponseGenerator implements ResponseGenerator {
         }
     }
 
+    public void parseRoutes() {
+        String routesString = readInRoutes();
+        routes = new HashMap<String, String>();
+        String[] allRoutes = routesString.split("\n");
+
+        for(String route : allRoutes) {
+            routes.put(route.split("\\|")[0].trim(), route.split("\\|")[1].trim());
+        }
+    }
+
+    public String readInRoutes() {
+        File routesFile = getFile("/../config/routes.txt");
+        String routesString = "";
+
+        try {
+            BufferedReader routeReader = new BufferedReader(new FileReader(routesFile));
+
+            while(routeReader.ready()) {
+                int nextChar = routeReader.read();
+                routesString += (char)nextChar;
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return routesString;
+    }
+
     public boolean isCustomRoute() {
-        File routes = getFile("/config/routes.txt");
-        if(!routes.exists()) {
+        if(routes.isEmpty()) {
             return false;
+        }
+        else if(routes.containsKey(request.get("Request-URI"))) {
+            return true;
         }
 
         return false;

@@ -32,6 +32,9 @@ public class HttpResponseGeneratorTest {
     @Before
     public void initializer() {
         generator1 = new MockResponseGenerator(new HashMap<String, String>());
+
+        stndOut = System.out;
+        System.setOut(new PrintStream(outContent));
     }
 
     @After
@@ -46,6 +49,40 @@ public class HttpResponseGeneratorTest {
         assertEquals("HTTP/1.1 404 Not Found\r\n", generator1.getStatusLine(404));
         assertEquals("HTTP/1.1 200 OK\r\n", generator1.getStatusLine(200));
         assertEquals("HTTP/1.1 415 Unsupported Media Type\r\n", generator1.getStatusLine(415));
+    }
+
+    @Test
+    public void parseExternalRoutes() {
+        Map<String, String> parsedRoute = new HashMap<String, String>();
+        parsedRoute.put("/custom", "src/customResponse.java");
+        parsedRoute.put("/custom2", "src/customResponse2.java");
+
+        generator1.parseRoutes();
+        assertEquals(parsedRoute, generator1.getRoutes());
+    }
+
+    @Test
+    public void readInRoutesFile() {
+        assertEquals("/custom   |   src/customResponse.java\n" +
+                        "/custom2  |   src/customResponse2.java",
+                    generator1.readInRoutes());
+    }
+
+    @Test
+    public void isCustomRouteTest() {
+        Map<String, String> parsedRoute = new HashMap<String, String>();
+        parsedRoute.put("/custom", "src/customResponse.java");
+        parsedRoute.put("/custom2", "src/customResponse2.java");
+
+        Map<String, String> request = new HashMap<String, String>();
+        request.put("Method", "GET");
+        request.put("Request-URI", "/custom");
+        request.put("HTTP-Version", "HTTP/1.1");
+
+        generator1 = new MockResponseGenerator(request);
+        generator1.parseRoutes();
+
+        assertEquals(true, generator1.isCustomRoute());
     }
 
     @Test
@@ -179,10 +216,5 @@ public class HttpResponseGeneratorTest {
                     "<a href=\"/coverage/_files/4.html\">4.html</a><br />\r\n" +
                     "</body></html>",
                 new String(generator1.generate()));
-    }
-
-    @Test
-    public void parseRoutes() {
-        assertEquals("", "");
     }
 }

@@ -1,2 +1,2 @@
-/custom   |   src/customResponse.java
-/custom2  |   src/customResponse2.java
+/custom    |   test_data.src   |   MyResponse        |   get
+/custom2   |   test_data.src   |   MyOtherResponse   |   get

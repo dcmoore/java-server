@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class HttpResponseGeneratorTest {
     class MockResponseGenerator extends HttpResponseGenerator {
@@ -49,19 +50,45 @@ public class HttpResponseGeneratorTest {
     }
 
     @Test
+    public void wontParseEmptyRoutesFile() {
+        File file = generator1.getFile("/../config/routes.txt");
+        Writer output;
+
+        try {
+            output = new BufferedWriter(new FileWriter(file));
+            output.write("");
+            output.close();
+        } catch (Exception e) {}
+
+        generator1.parseRoutes();
+        assertTrue(generator1.getRoutes().isEmpty());
+    }
+
+    @Test
     public void parseExternalRoutes() {
         populateRoutesFile();
-        Map<String, String> parsedRoute = new HashMap<String, String>();
-        parsedRoute.put("/custom", "src/customResponse.java");
-        parsedRoute.put("/custom2", "src/customResponse2.java");
+
+        Map<String, String> routeCustom = new HashMap<String, String>();
+        routeCustom.put("package", "test_data.src");
+        routeCustom.put("class", "MyResponse");
+        routeCustom.put("method", "get");
+
+        Map<String, String> routeCustom2 = new HashMap<String, String>();
+        routeCustom2.put("package", "test_data.src");
+        routeCustom2.put("class", "MyOtherResponse");
+        routeCustom2.put("method", "get");
+
+        Map<String, Map<String, String>> parsedRoute = new HashMap<String, Map<String, String>>();
+        parsedRoute.put("/custom", routeCustom);
+        parsedRoute.put("/custom2", routeCustom2);
 
         generator1.parseRoutes();
         assertEquals(parsedRoute, generator1.getRoutes());
     }
 
     public void populateRoutesFile() {
-        String text = "/custom   |   src/customResponse.java\n" +
-                      "/custom2  |   src/customResponse2.java";
+        String text = "/custom    |   test_data.src   |   MyResponse        |   get\n" +
+                      "/custom2   |   test_data.src   |   MyOtherResponse   |   get";
         File file = generator1.getFile("/../config/routes.txt");
         Writer output;
 
@@ -75,8 +102,8 @@ public class HttpResponseGeneratorTest {
     @Test
     public void readInRoutesFile() {
         populateRoutesFile();
-        assertEquals("/custom   |   src/customResponse.java\n" +
-                        "/custom2  |   src/customResponse2.java",
+        assertEquals("/custom    |   test_data.src   |   MyResponse        |   get\n" +
+                     "/custom2   |   test_data.src   |   MyOtherResponse   |   get",
                     generator1.readInRoutes());
     }
 
@@ -105,7 +132,7 @@ public class HttpResponseGeneratorTest {
         generator1 = new MockResponseGenerator(request);
         generator1.parseRoutes();
 
-        assertEquals("", new String(generator1.generate()));
+        assertEquals("test", new String(generator1.generate()));
     }
 
     @Test

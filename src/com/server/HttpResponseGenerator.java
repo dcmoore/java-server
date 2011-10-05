@@ -12,13 +12,13 @@ import java.util.Map;
 
 public class HttpResponseGenerator implements ResponseGenerator {
     protected Map<String, String> request;
-    protected Map<String, String> routes;
+    protected Map<String, Map<String, String>> routes;
 
     public HttpResponseGenerator(Map<String, String> r) {
         request = r;
     }
 
-    public Map<String, String> getRoutes() {
+    public Map<String, Map<String, String>> getRoutes() {
         return routes;
     }
 
@@ -105,12 +105,16 @@ public class HttpResponseGenerator implements ResponseGenerator {
 
     public void parseRoutes() {
         String routesString = readInRoutes();
-        routes = new HashMap<String, String>();
+        routes = new HashMap<String, Map<String, String>>();
 
         if(!routesString.equals("")) {
             String[] allRoutes = routesString.split("\n");
             for(String route : allRoutes) {
-                routes.put(route.split("\\|")[0].trim(), route.split("\\|")[1].trim());
+                Map<String, String> temp = new HashMap<String, String>();
+                temp.put("package", route.split("\\|")[1].trim());
+                temp.put("class", route.split("\\|")[2].trim());
+                temp.put("method", route.split("\\|")[3].trim());
+                routes.put(route.split("\\|")[0].trim(), temp);
             }
         }
     }
@@ -137,10 +141,7 @@ public class HttpResponseGenerator implements ResponseGenerator {
     }
 
     public boolean isCustomRoute() {
-        if(routes.isEmpty()) {
-            return false;
-        }
-        else if(routes.containsKey(request.get("Request-URI"))) {
+        if(routes.containsKey(request.get("Request-URI"))) {
             return true;
         }
 

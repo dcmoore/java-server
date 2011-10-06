@@ -6,17 +6,30 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
 
 public class ServerTest {
-    private Server server;
+    class TestServer extends Server {
+        public Runnable createTask(Socket s, Map<String, ServerResponse> r) {
+            return new TestTask();
+        }
+    }
+
+    class TestTask implements Runnable {
+        public void run() {
+            System.out.println("Test Task Running");
+        }
+    }
+
+    private TestServer server;
 
     @Before
     public void initialize() {
-        server = new Server();
+        server = new TestServer();
         server.setCurrentPort(8576);
     }
 
@@ -52,24 +65,25 @@ public class ServerTest {
         server.start();
 
         try {
-            Thread.sleep(800); //Give the server enough startup time
-            assertTrue(server.isActive());
-            while(!server.gracefulKill()) {}
+            while(!server.isActive()){ Thread.yield(); }
+            while(!server.gracefulKill()) { Thread.yield(); }
         } catch (Exception e) {
             assertTrue(false); //Shouldn't run
         }
+
+        assertFalse(server.isActive());
     }
 
     @Test
     public void acceptsConnectionsOnlyWhenServerIsRunning() {
         server.start();
-        while(!server.isActive()) {}
+        while(!server.isActive()) { Thread.yield(); }
         assertEquals(0, server.getNumRequests());
 
         try {
             Socket test = new Socket("localhost", 8576);
             test.getOutputStream().write("This request should go through".getBytes());
-            while(server.getNumRequests() != 1) {}
+            while(server.getNumRequests() != 1) { Thread.yield(); }
             test.close();
             assertTrue(server.kill());
         } catch (Exception e) {
@@ -89,7 +103,7 @@ public class ServerTest {
     @Test
     public void acceptsSimultaneousConnections() {
         server.start();
-        while(!server.isActive()) {}
+        while(!server.isActive()) { Thread.yield(); }
         assertEquals(0, server.getNumRequests());
 
         try {
@@ -99,11 +113,11 @@ public class ServerTest {
             conn1.getOutputStream().write("This request should go through".getBytes());
             conn2.getOutputStream().write("This request should also go through".getBytes());
 
-            while(!(server.getNumRequests() == 2)) {}
+            while(!(server.getNumRequests() == 2)) { Thread.yield(); }
             conn1.close();
             conn2.close();
 
-            while(!server.gracefulKill()) {}
+            while(!server.gracefulKill()) { Thread.yield(); }
         } catch (Exception e) {
             assertTrue(false);
         }
@@ -114,17 +128,17 @@ public class ServerTest {
     @Test
     public void acceptsManyConnections() {
         server.start();
-        while(!server.isActive()) {}
+        while(!server.isActive()) { Thread.yield(); }
 
         try {
             for(int i = 1; i <= 50; i++) {
                 Socket conn = new Socket("localhost", 8576);
                 conn.getOutputStream().write("This request should go through".getBytes());
-                while(server.getNumRequests() != i) {}
+                while(server.getNumRequests() != i) { Thread.yield(); }
                 conn.close();
             }
 
-            while(!server.gracefulKill()) {}
+            while(!server.gracefulKill()) { Thread.yield(); }
         } catch (Exception e) {}
 
         assertEquals(50, server.getNumRequests());

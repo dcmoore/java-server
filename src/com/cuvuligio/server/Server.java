@@ -66,21 +66,18 @@ public class Server implements Runnable {
             while(true) {
                 System.out.println("Waiting for a request...");
 
-                Socket socket = this.acceptRequest();
+                Socket socket = server.accept();
                 numRequests++;
                 Runnable task = this.createTask(socket, routes);
                 new Thread(taskGroup, task, (numRequests + "")).start();
             }
         } catch (SocketException e) {
             System.out.println("Closed the server on port: " + port);
+            System.out.println(e.toString());
         } catch (Exception e) {}
     }
 
-    private Socket acceptRequest() throws IOException {
-        return server.accept();
-    }
-
-    private Runnable createTask(Socket s, Map<String, ServerResponse> r) {
+    public Runnable createTask(Socket s, Map<String, ServerResponse> r) {
         return new Task(s, r);
     }
 
@@ -92,6 +89,7 @@ public class Server implements Runnable {
     public boolean kill() throws IOException {
         if(server != null && !server.isClosed()) {
             server.close();
+            server = null;
             return true;
         }
 

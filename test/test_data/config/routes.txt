@@ -1,2 +1,0 @@
-/custom    |   test_data.src   |   MyResponse        |   get
-/custom2   |   test_data.src   |   MyOtherResponse   |   get

@@ -6,7 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import java.io.IOException;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;

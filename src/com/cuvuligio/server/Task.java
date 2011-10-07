@@ -1,6 +1,5 @@
 package com.cuvuligio.server;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,10 +17,10 @@ public class Task implements Runnable {
     }
 
     public void run() {
-        System.out.println("Thread " + Thread.currentThread().getName() + " is starting...");
-
         try {
             Map<String, String> parsedRequest = new HttpRequestParser(this.getInputStream()).parse();
+            this.addConnectionDetails(parsedRequest);
+
             byte[] response = new HttpResponseGenerator(parsedRequest, routes).generate();
             this.getOutputStream().write(response);
             socket.close();
@@ -30,11 +29,16 @@ public class Task implements Runnable {
         System.out.println("Thread " + Thread.currentThread().getName() + " is done.");
     }
 
-        public InputStream getInputStream() throws IOException {
-            return socket.getInputStream();
-        }
+    public InputStream getInputStream() throws IOException {
+        return socket.getInputStream();
+    }
 
-        public OutputStream getOutputStream() throws IOException {
-            return socket.getOutputStream();
-        }
+    public void addConnectionDetails(Map<String, String> parsedRequest) {
+        parsedRequest.put("Address", socket.getInetAddress().toString());
+        parsedRequest.put("Port", (socket.getLocalPort() + ""));
+    }
+
+    public OutputStream getOutputStream() throws IOException {
+        return socket.getOutputStream();
+    }
 }

@@ -1,6 +1,8 @@
 package com.cuvuligio.server;
 
 
+import com.cuvuligio.server.responses.*;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -97,6 +99,9 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] args) {
-        new Server().start();
+        Server myServer = new Server();
+        myServer.addRoute("/echo", new EchoResponse());
+        myServer.addRoute("/time", new TimeResponse());
+        myServer.start();
     }
 }

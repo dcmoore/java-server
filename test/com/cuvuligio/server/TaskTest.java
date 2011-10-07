@@ -27,6 +27,10 @@ public class TaskTest {
             return new ByteArrayInputStream("GET /test2 HTTP/1.1\r\nOrigin: TaskTest.java\r\n\r\n".getBytes());
         }
 
+        public void addConnectionDetails(Map<String, String> parsedRequest) {
+            //Do nothing
+        }
+
         private void resetOutputStream() {
             output = new ByteArrayOutputStream();
         }
@@ -36,13 +40,13 @@ public class TaskTest {
         }
     }
 
-    class TestResponse1 implements ServerResponse {
+    class TestResponse1 extends ServerResponse {
         public byte[] get(Map<String, String> request) {
             return "test1".getBytes();
         }
     }
 
-    class TestResponse2 implements ServerResponse {
+    class TestResponse2 extends ServerResponse {
         public byte[] get(Map<String, String> request) {
             return "test2".getBytes();
         }
